@@ -1,0 +1,31 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import { useEffect, useMemo } from 'react';
+import { useForm, Controller } from 'react-hook-form';
+import { CheckCircle2, Circle, AlertCircle } from 'lucide-react';
+export function SkillChecklistForm({ skills, studentSkills = [], onSubmit, loading = false, }) {
+    const { control, handleSubmit, watch, reset } = useForm({
+        defaultValues: {
+            skills: skills.map((skill) => ({
+                skillId: skill.id,
+                completed: studentSkills.find((ss) => ss.skillId === skill.id)?.completed || false,
+            })),
+        },
+    });
+    const formValues = watch();
+    const completedCount = useMemo(() => formValues.skills.filter((s) => s.completed).length, [formValues.skills]);
+    const lulusStatus = completedCount === skills.length;
+    useEffect(() => {
+        reset({
+            skills: skills.map((skill) => ({
+                skillId: skill.id,
+                completed: studentSkills.find((ss) => ss.skillId === skill.id)?.completed || false,
+            })),
+        });
+    }, [skills, studentSkills, reset]);
+    const handleFormSubmit = async () => {
+        await onSubmit(formValues.skills);
+    };
+    return (_jsxs("form", { onSubmit: handleSubmit(handleFormSubmit), className: "card space-y-4", children: [_jsxs("div", { className: "flex items-center justify-between", children: [_jsx("h2", { className: "text-lg font-semibold", children: "Skill Checklist" }), _jsx("div", { className: `px-3 py-1 rounded-full text-sm font-medium ${lulusStatus
+                            ? 'bg-success-100 text-success-700'
+                            : 'bg-warning-100 text-warning-700'}`, children: lulusStatus ? '✓ LULUS' : `${completedCount}/${skills.length}` })] }), skills.length === 0 ? (_jsx("div", { className: "p-4 text-center text-gray-500", children: "No skills available" })) : (_jsx("div", { className: "space-y-3 max-h-96 overflow-y-auto", children: skills.map((skill, index) => (_jsx(Controller, { name: `skills.${index}.completed`, control: control, render: ({ field }) => (_jsxs("label", { className: "flex items-start gap-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer transition-colors", children: [_jsx("input", { type: "checkbox", className: "mt-1 w-5 h-5 cursor-pointer", checked: field.value, onChange: (e) => field.onChange(e.target.checked), disabled: loading }), _jsxs("div", { className: "flex-1", children: [_jsx("p", { className: "font-medium text-gray-900", children: skill.name }), _jsx("p", { className: "text-sm text-gray-600", children: skill.description }), _jsx("p", { className: "text-xs text-gray-400 mt-1", children: _jsx("span", { className: "inline-block bg-gray-100 px-2 py-1 rounded", children: skill.category }) })] }), _jsx("div", { className: "flex-shrink-0", children: field.value ? (_jsx(CheckCircle2, { className: "text-success-500", size: 24 })) : (_jsx(Circle, { className: "text-gray-300", size: 24 })) })] })) }, skill.id))) })), _jsxs("div", { className: "flex gap-2 pt-4", children: [_jsx("button", { type: "submit", className: "btn-primary flex-1 disabled:opacity-50 disabled:cursor-not-allowed", disabled: loading || skills.length === 0, children: loading ? 'Saving...' : 'Save Assessment' }), lulusStatus && (_jsxs("div", { className: "flex items-center gap-2 px-3 py-2 bg-success-50 text-success-700 rounded-lg", children: [_jsx(AlertCircle, { size: 18 }), _jsx("span", { className: "text-sm font-medium", children: "Status: LULUS" })] }))] })] }));
+}
