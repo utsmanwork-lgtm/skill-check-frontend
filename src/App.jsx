@@ -1,27 +1,29 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import './index.css';
+import ProtectedRoute from './components/ProtectedRoute';
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
 import StudentDetailPage from './pages/StudentDetailPage';
 import AdminMasterDataPage from './pages/AdminMasterDataPage';
 import AssessmentChecklistPage from './pages/AssessmentChecklistPage';
 import DashboardAnalyticsPage from './pages/DashboardAnalyticsPage';
+import AdminUsersPage from './pages/AdminUsersPage';
 
 function App() {
   return (
     <BrowserRouter>
-      <div className="min-h-screen bg-gray-50">
-        <Routes>
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/student/:studentId" element={<StudentDetailPage />} />
-          <Route path="/student/:studentId/skill/:skillId/assessment" element={<AssessmentChecklistPage />} />
-          <Route path="/admin" element={<AdminMasterDataPage />} />
-          <Route path="/analytics" element={<DashboardAnalyticsPage />} />
-          <Route path="/" element={<DashboardPage />} />
-        </Routes>
-      </div>
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+        <Route path="/student/:studentId" element={<ProtectedRoute requiredRole="guru"><StudentDetailPage /></ProtectedRoute>} />
+        <Route path="/student/:studentId/skill/:skillId/assessment" element={<ProtectedRoute requiredRole="guru"><AssessmentChecklistPage /></ProtectedRoute>} />
+        <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><AdminMasterDataPage /></ProtectedRoute>} />
+        <Route path="/analytics" element={<ProtectedRoute requiredRole="admin"><DashboardAnalyticsPage /></ProtectedRoute>} />
+        <Route path="/admin/users" element={<ProtectedRoute requiredRole="admin"><AdminUsersPage /></ProtectedRoute>} />
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      </Routes>
     </BrowserRouter>
   );
 }

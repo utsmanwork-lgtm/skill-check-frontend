@@ -73,14 +73,44 @@ export const AuthProvider = ({ children }) => {
     return data;
   };
 
+  const register = async (email, password, nama) => {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          name: nama,
+        },
+      },
+    });
+    if (error) throw error;
+    return data;
+  };
+
   const logout = async () => {
     await supabase.auth.signOut();
     setUser(null);
     setProfile(null);
   };
 
+  const refreshProfile = async () => {
+    if (!user) return;
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+      if (!error && data) {
+        setProfile(data);
+      }
+    } catch (err) {
+      console.error('Profile refresh error:', err);
+    }
+  };
+
   const getRole = () => {
-    return profile?.role ?? 'guru'; // default
+    return profile?.role ?? 'pending';
   };
 
   const isAdmin = () => {
@@ -88,14 +118,16 @@ export const AuthProvider = ({ children }) => {
   };
 
   const isGuru = () => {
-    return profile?.role === 'guru';
+    return profile?.role === 'guru' || profile?.role === 'admin';
   };
 
   const value = {
     user,
     profile,
     login,
+    register,
     logout,
+    refreshProfile,
     getRole,
     isAdmin,
     isGuru,
